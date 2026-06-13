@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "微博私信备份助手",
+  "version": "1.0.3",
+  "description": "保守限速地把微博私信备份到本地（支持增量），数据全程不出本机。需配合本地服务使用。",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "permissions": ["storage", "cookies"],
+  "host_permissions": [
+    "http://127.0.0.1:8765/*",
+    "https://*.weibo.com/*"
+  ],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://api.weibo.com/chat*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://api.weibo.com/chat*"],
+      "js": ["injected.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    }
+  ]
+}

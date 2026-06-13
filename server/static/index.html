@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>微博私信备份 · 本地管理</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 6a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4h-5l-4.2 3.36A1 1 0 0 1 5 18.58V16a4 4 0 0 1-1-2.65V6Z" fill="url(#g)"/><path d="M12 6.5v5m0 0 2.2-2.2M12 11.5 9.8 9.3" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="g" x1="4" y1="2" x2="20" y2="18"><stop stop-color="#ff8a3d"/><stop offset="1" stop-color="#ff5e62"/></linearGradient></defs></svg>
+      </div>
+      <div>
+        <h1>微博私信备份</h1>
+        <p id="stats-line">连接中…</p>
+      </div>
+    </div>
+    <div class="search-box">
+      <input id="search-input" type="search" placeholder="搜索全部聊天记录…">
+    </div>
+    <div class="contact-list" id="contact-list">
+      <div class="empty-hint">
+        <p>还没有备份数据</p>
+        <p class="sub">在微博私信页面点击插件面板里的「开始备份」即可</p>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <span class="dot ok"></span> 本地服务运行中 · 数据仅存本机
+    </div>
+  </aside>
+  <main class="main">
+    <div id="welcome" class="welcome">
+      <svg viewBox="0 0 24 24" fill="none" class="big-icon"><path d="M4 6a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4h-5l-4.2 3.36A1 1 0 0 1 5 18.58V16a4 4 0 0 1-1-2.65V6Z" fill="url(#g2)"/><defs><linearGradient id="g2" x1="4" y1="2" x2="20" y2="18"><stop stop-color="#ffd2b3"/><stop offset="1" stop-color="#ffb3b5"/></linearGradient></defs></svg>
+      <h2>选择左侧联系人查看备份</h2>
+      <p>支持搜索、增量备份与一键导出 HTML</p>
+      <div id="welcome-stats" class="welcome-stats"></div>
+    </div>
+    <div id="chat" class="chat" hidden>
+      <header class="chat-header">
+        <div>
+          <h2 id="chat-name"></h2>
+          <p id="chat-meta"></p>
+        </div>
+        <div class="actions">
+          <button id="btn-calendar" class="btn ghost">📅 按日期跳转</button>
+          <button id="btn-export" class="btn primary">导出 HTML</button>
+          <div id="cal-pop" class="cal-pop" hidden></div>
+        </div>
+      </header>
+      <div class="messages" id="messages"></div>
+    </div>
+    <div id="search-results" class="search-results" hidden>
+      <header class="chat-header"><h2>搜索结果</h2><button id="btn-close-search" class="btn ghost">关闭</button></header>
+      <div class="messages" id="search-list"></div>
+    </div>
+  </main>
+</div>
+<div id="export-modal" class="modal" hidden>
+  <div class="modal-card">
+    <h3>导出 HTML</h3>
+    <div class="export-opts">
+      <label class="opt"><input type="radio" name="exp-range" value="all" checked> 导出全部聊天记录</label>
+      <label class="opt"><input type="radio" name="exp-range" value="range"> 按日期范围导出</label>
+    </div>
+    <div id="exp-dates" class="exp-dates" hidden>
+      <label>从 <input type="date" id="exp-from"></label>
+      <label>到 <input type="date" id="exp-to"></label>
+    </div>
+    <p class="modal-tip" id="exp-tip"></p>
+    <div class="modal-actions">
+      <button class="btn ghost" id="exp-cancel">取消</button>
+      <button class="btn primary" id="exp-go">生成并保存</button>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

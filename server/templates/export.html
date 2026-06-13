@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ contact_name }} · 微博私信备份</title>
+<style>
+  :root {
+    --bg: #f5f3ef; --card: #ffffff; --ink: #2b2a28; --muted: #97917f;
+    --out: linear-gradient(135deg, #ff8a3d, #ff5e62); --in-bg: #ffffff;
+    --accent: #ff7043;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px 60px; }
+  header { text-align: center; padding: 28px 0 18px; }
+  header h1 { font-size: 22px; margin: 0 0 6px; }
+  header p { color: var(--muted); font-size: 13px; margin: 0; }
+  .day { text-align: center; margin: 28px 0 14px; }
+  .day span { background: #e9e4da; color: #7c7666; font-size: 12px;
+    padding: 4px 14px; border-radius: 999px; }
+  .msg { display: flex; margin: 8px 0; align-items: flex-end; gap: 8px; }
+  .msg.out { justify-content: flex-end; }
+  .ava {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    object-fit: cover; background: #e9e4da; margin-bottom: 2px;
+  }
+  .ava.fallback {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--out); color: #fff; font-size: 14px; font-weight: 600;
+  }
+  .bubble { max-width: 76%; padding: 10px 14px; border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.06); white-space: pre-wrap; word-break: break-word; }
+  .in .bubble { background: var(--in-bg); border-bottom-left-radius: 4px; }
+  .out .bubble { background: var(--out); color: #fff; border-bottom-right-radius: 4px; }
+  .time { font-size: 11px; color: var(--muted); align-self: flex-end; margin: 0 8px 4px; }
+  .out .time { order: -1; }
+  .in .time { order: 1; }
+  .bubble img { max-width: 100%; border-radius: 10px; display: block; margin-top: 6px; }
+  .bubble video, .bubble audio { max-width: 100%; margin-top: 6px; }
+  .media-missing { font-size: 12px; opacity: .75; font-style: italic; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>与 {{ contact_name }} 的私信</h1>
+    <p>UID {{ uid }} · 共 {{ total }} 条 · 导出于 {{ generated_at }}</p>
+  </header>
+  {% for d in days %}
+  <div class="day"><span>{{ d.day }}</span></div>
+    {% for m in d.messages %}
+    <div class="msg {{ m.direction }}">
+      {% if m.direction == 'in' %}
+        {% if ava_in %}<img class="ava" src="{{ ava_in }}" referrerpolicy="no-referrer" alt=""
+          onerror="this.outerHTML='<div class=\'ava fallback\'>{{ name_in[:1] }}</div>'">
+        {% else %}<div class="ava fallback">{{ name_in[:1] }}</div>{% endif %}
+      {% endif %}
+      <div class="time">{{ m.time }}</div>
+      <div class="bubble">{{ m.text }}{% for media in m.media %}
+        {%- if media.type == 'video' -%}
+          <video controls src="../media/{{ media.local_path }}"></video>
+        {%- elif media.type == 'voice' -%}
+          <audio controls src="../media/{{ media.local_path }}"></audio>
+        {%- else -%}
+          <img src="../media/{{ media.local_path }}" loading="lazy" alt="">
+        {%- endif -%}
+      {% endfor %}{% if m.type != 'text' and not m.media %}<div class="media-missing">[{{ m.type }} 媒体未下载]</div>{% endif %}</div>
+      {% if m.direction == 'out' %}
+        {% if ava_out %}<img class="ava" src="{{ ava_out }}" referrerpolicy="no-referrer" alt=""
+          onerror="this.outerHTML='<div class=\'ava fallback\'>{{ name_out[:1] }}</div>'">
+        {% else %}<div class="ava fallback">{{ name_out[:1] }}</div>{% endif %}
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% endfor %}
+  <footer>由微博私信备份助手生成 · 数据仅存本地</footer>
+</div>
+</body>
+</html>

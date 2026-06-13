@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  body {
+    width: 290px; margin: 0; padding: 0;
+    font: 13px/1.6 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #2b2a28; background: #fdfcfa;
+  }
+  .head {
+    display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+    background: linear-gradient(135deg, #ff8a3d, #ff5e62); color: #fff;
+  }
+  .head img { width: 28px; height: 28px; }
+  .head b { font-size: 14px; }
+  .body { padding: 14px 16px; }
+  .status { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #d6d2c8; flex-shrink: 0; }
+  .dot.ok { background: #34c759; } .dot.bad { background: #ff3b30; }
+  .hint { font-size: 12px; color: #98917f; margin: 2px 0 12px 17px; }
+  a.btn {
+    display: block; text-align: center; text-decoration: none;
+    padding: 9px 0; border-radius: 10px; margin-bottom: 8px; font-size: 13px;
+  }
+  .btn.primary { background: linear-gradient(135deg, #ff8a3d, #ff5e62); color: #fff; }
+  .btn.ghost { border: 1px solid #ece7dd; color: #6b655a; }
+  .foot { font-size: 11px; color: #b3ac9b; text-align: center; padding: 0 16px 12px; }
+</style>
+</head>
+<body>
+  <div class="head"><img src="icons/icon48.png" alt=""><b>微博私信备份助手</b></div>
+  <div class="body">
+    <div class="status"><span class="dot" id="dot-server"></span><span id="txt-server">检测本地服务…</span></div>
+    <div class="hint" id="hint-server"></div>
+    <a class="btn primary" href="https://api.weibo.com/chat" target="_blank">打开微博私信页开始备份</a>
+    <a class="btn ghost" href="http://127.0.0.1:8765" target="_blank">打开本地管理界面</a>
+  </div>
+  <div class="foot">只读备份 · 保守限速 · 数据仅存本机</div>
+  <script src="popup.js"></script>
+</body>
+</html>

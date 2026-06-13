@@ -1,0 +1,26 @@
+# —— 隐私数据：绝对不要上传 ——
+# 聊天记录数据库、媒体文件、导出 HTML、Cookie、日志
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# 私人调研文档（不属于开源代码）
+compass_artifact_*.md
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# 打包产物
+*.zip
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 编辑器 / 工具
+.claude/
+.vscode/
+.idea/
