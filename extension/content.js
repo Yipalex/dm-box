@@ -31,12 +31,57 @@
   const rand = (min, max) => min + Math.random() * (max - min);
 
   // ---------- 与本地服务通信（经 background 中转） ----------
+  // 插件被刷新/更新后，本页里残留的旧脚本会“失联”（Extension context invalidated）。
+  // 这里统一捕获，提示刷新页面，而不是抛红色错误、也不让正在跑的备份崩掉。
+  let contextDead = false;
+
+  function isContextInvalidated(err) {
+    return (
+      !chrome.runtime?.id ||
+      (err && /Extension context invalidated|message port closed|receiving end does not exist/i.test(String(err.message || err)))
+    );
+  }
+
+  function handleContextDead() {
+    if (contextDead) return;
+    contextDead = true;
+    state.stopFlag = true;
+    log("🔄 插件已更新或重新加载，本页脚本已失效。请刷新本页面（按 ⌘R / Ctrl+R）后继续。");
+    showRefreshBanner();
+  }
+
   function serverApi(path, method = "GET", body) {
     return new Promise((resolve) => {
-      chrome.runtime.sendMessage({ type: "api", path, method, body }, (resp) => {
-        resolve(resp || { ok: false, error: "no response" });
-      });
+      try {
+        if (!chrome.runtime?.id) {
+          handleContextDead();
+          return resolve({ ok: false, error: "context invalidated" });
+        }
+        chrome.runtime.sendMessage({ type: "api", path, method, body }, (resp) => {
+          if (chrome.runtime.lastError) {
+            if (isContextInvalidated(chrome.runtime.lastError)) handleContextDead();
+            return resolve({ ok: false, error: chrome.runtime.lastError.message });
+          }
+          resolve(resp || { ok: false, error: "no response" });
+        });
+      } catch (e) {
+        if (isContextInvalidated(e)) handleContextDead();
+        resolve({ ok: false, error: String(e) });
+      }
     });
+  }
+
+  function showRefreshBanner() {
+    if (document.getElementById("wdb-refresh-banner")) return;
+    const b = document.createElement("div");
+    b.id = "wdb-refresh-banner";
+    b.style.cssText =
+      "position:fixed;top:0;left:0;right:0;z-index:2147483647;background:linear-gradient(135deg,#ff8a3d,#ff5e62);" +
+      "color:#fff;font:14px/1.5 -apple-system,'PingFang SC',sans-serif;text-align:center;padding:10px 16px;" +
+      "box-shadow:0 2px 12px rgba(0,0,0,.2);cursor:pointer";
+    b.textContent = "🔄 私信匣 DMBox 已更新，请点此刷新页面后继续备份";
+    b.addEventListener("click", () => location.reload());
+    document.documentElement.appendChild(b);
   }
 
   // ---------- 对微博接口的受控请求 ----------
@@ -196,7 +241,22 @@
 
   function pushCookies() {
     return new Promise((resolve) => {
-      chrome.runtime.sendMessage({ type: "send_cookies" }, (r) => resolve(r || { ok: false }));
+      try {
+        if (!chrome.runtime?.id) {
+          handleContextDead();
+          return resolve({ ok: false });
+        }
+        chrome.runtime.sendMessage({ type: "send_cookies" }, (r) => {
+          if (chrome.runtime.lastError) {
+            if (isContextInvalidated(chrome.runtime.lastError)) handleContextDead();
+            return resolve({ ok: false });
+          }
+          resolve(r || { ok: false });
+        });
+      } catch (e) {
+        if (isContextInvalidated(e)) handleContextDead();
+        resolve({ ok: false });
+      }
     });
   }
 
