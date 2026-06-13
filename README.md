@@ -102,24 +102,6 @@ data/
 - 媒体文件下载自带 `Referer: https://weibo.com`（绕过 sinaimg 防盗链），按内容哈希去重
 - 想看原始数据：任何 SQLite 工具（如 [DB Browser for SQLite](https://sqlitebrowser.org)）打开 `weibo_dm.db` 即可
 
-## 插件发布到 Chrome Web Store（可选）
-
-个人使用**不需要上架**，上面的"加载已解压"方式即可长期使用。若想公开发布：
-
-1. **打包**：运行 `scripts/pack_extension.sh`，生成 `weibo-dm-backup-extension-vX.zip`
-2. **注册开发者**：访问 [Chrome Web Store 开发者控制台](https://chrome.google.com/webstore/devconsole)，用 Google 账号注册并支付一次性 5 美元注册费
-3. **创建项目**：点「新增项目」上传 zip
-4. **填写商店资料**：
-   - 名称、描述（可直接用本 README 开头两段）
-   - 图标：`extension/icons/icon128.png`；另需 1–5 张 1280×800 截图（截备份面板和管理界面即可）
-   - 类别选「生产工具」，语言选中文
-5. **隐私问卷**（审核重点，如实填写即可通过）：
-   - 单一用途：备份用户自己的微博私信到其本地电脑
-   - 权限说明：`storage` 用于保存用户偏好；`host_permissions` 中 `127.0.0.1:8765` 用于与用户本机的备份服务通信；内容脚本注入 `api.weibo.com/chat` 用于在私信页提供备份面板
-   - 数据使用声明：**不收集、不传输任何用户数据**，全部数据仅保存在用户本机
-6. **提交审核**：通常 1–3 个工作日。涉及第三方网站数据的扩展可能被要求补充说明，引用上面的隐私声明即可
-7. **更新版本**：改 `manifest.json` 里的 `version`，重新打包上传
-
 > 注意：本插件依赖微博**未公开接口**，且需要配合本地服务才能用。公开上架前建议在商店描述里写清楚使用前提，否则容易收到差评或被举报误判。**个人/小范围使用推荐"加载已解压"或直接分发 zip。**
 
 ## 常见问题
