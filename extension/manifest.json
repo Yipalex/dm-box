@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "微博私信备份助手",
-  "version": "1.0.3",
-  "description": "保守限速地把微博私信备份到本地（支持增量），数据全程不出本机。需配合本地服务使用。",
+  "name": "私信匣 DMBox · 微博私信备份",
+  "version": "1.0.4",
+  "description": "私信匣 DMBox：保守限速地把微博私信备份到本地（支持增量），数据全程不出本机。A Leo's box for an Aries' whispers。需配合本地服务使用。",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
