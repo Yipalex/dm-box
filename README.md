@@ -1,4 +1,4 @@
-# 私信匣 · DMBox
+# 私信匣 · DMBox ![logo](extension\icons\icon32.png "logo")
 
 > *A Leo's box for an Aries' whispers.* — 狮子座为白羊座私语准备的匣子。
 
