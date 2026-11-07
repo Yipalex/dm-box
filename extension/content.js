@@ -50,6 +50,15 @@
     showRefreshBanner();
   }
 
+  async function getPreferences() {
+    const response = await chrome.runtime.sendMessage({ type: "get_preferences" });
+    return response?.data || {};
+  }
+
+  function setPreferences(values) {
+    return chrome.runtime.sendMessage({ type: "set_preferences", values });
+  }
+
   function serverApi(path, method = "GET", body) {
     return new Promise((resolve) => {
       try {
@@ -208,7 +217,7 @@
 
       const resp = await serverApi("/api/ingest", "POST", { uid, mode, messages });
       if (!resp.ok) {
-        log(`❌ 本地服务写入失败（${resp.error || resp.status}），停止。请确认本地服务在运行。`);
+        log(`❌ 备份服务写入失败（${resp.error || resp.status}），停止。请确认服务地址、访问密钥及网络连接正常。`);
         return { aborted: true };
       }
       total += resp.data.new;
@@ -284,8 +293,8 @@
           await sleep(gap);
         }
       }
-      await chrome.storage.local.set({ lastIncrementalAt: Date.now() });
-      log("🎉 本轮备份结束。可打开 http://127.0.0.1:8765 查看。");
+      await setPreferences({ lastIncrementalAt: Date.now() });
+      log("🎉 本轮备份结束。可通过扩展弹窗打开管理界面查看。");
     } finally {
       state.running = false;
       setButtonsRunning(false);
@@ -458,29 +467,29 @@
       log("正在停止…（等当前请求结束）");
     });
 
-    chrome.storage.local.get(["autoIncremental"]).then((v) => {
+    getPreferences().then((v) => {
       ui.autoInc.checked = !!v.autoIncremental;
     });
     ui.autoInc.addEventListener("change", () =>
-      chrome.storage.local.set({ autoIncremental: ui.autoInc.checked }));
+      setPreferences({ autoIncremental: ui.autoInc.checked }));
 
     // 本地服务健康检查
     (async () => {
       const r = await serverApi("/api/health");
       if (r.ok) {
         ui.dot.classList.add("ok");
-        log("✅ 已连接本地服务 (127.0.0.1:8765)");
+        log("✅ 已连接备份服务");
         const c = await pushCookies();
         if (c.ok) log("🔑 登录态已同步（用于下载图片/语音附件）");
       } else {
         ui.dot.classList.add("bad");
-        log("❌ 未检测到本地服务。请先运行 start.command 启动本地服务。");
+        log("❌ 未连接备份服务。请在扩展弹窗中检查地址、密钥并测试连接。");
       }
     })();
 
     // 自动增量：开关开启 + 距上次备份 >24h，页面打开 60s 后静默执行
     (async () => {
-      const v = await chrome.storage.local.get(["autoIncremental", "lastIncrementalAt"]);
+      const v = await getPreferences();
       if (!v.autoIncremental) return;
       if (Date.now() - (v.lastIncrementalAt || 0) < 24 * 3600 * 1000) return;
       await sleep(60000);

@@ -10,6 +10,7 @@ compass_artifact_*.md
 
 # Python
 .venv/
+.venv.backup.*/
 __pycache__/
 *.pyc
 
@@ -24,3 +25,8 @@ Thumbs.db
 .claude/
 .vscode/
 .idea/
+
+# Deployment credentials
+.env
+.env.*
+!.env.example

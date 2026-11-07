@@ -26,17 +26,27 @@
   .btn.primary { background: linear-gradient(135deg, #ff8a3d, #ff5e62); color: #fff; }
   .btn.ghost { border: 1px solid #ece7dd; color: #6b655a; }
   .foot { font-size: 11px; color: #b3ac9b; text-align: center; padding: 0 16px 12px; }
+input { box-sizing:border-box; width:100%; padding:7px; margin:4px 0 10px; }
+button { padding:8px; width:100%; cursor:pointer; }
+#settings-result { margin-top:8px; overflow-wrap:anywhere; }
 </style>
 </head>
 <body>
   <div class="head"><img src="icons/icon48.png" alt=""><b>私信匣 DMBox</b></div>
   <div class="body">
-    <div class="status"><span class="dot" id="dot-server"></span><span id="txt-server">检测本地服务…</span></div>
+    <div class="status"><span class="dot" id="dot-server"></span><span id="txt-server">检测备份服务…</span></div>
     <div class="hint" id="hint-server"></div>
     <a class="btn primary" href="https://api.weibo.com/chat" target="_blank">打开微博私信页开始备份</a>
-    <a class="btn ghost" href="http://127.0.0.1:8765" target="_blank">打开本地管理界面</a>
+    <a id="manage-link" class="btn ghost" href="http://127.0.0.1:8765" target="_blank" rel="noreferrer">打开管理界面</a>
+    <label for="server-url">服务地址</label>
+    <input id="server-url" type="url" placeholder="http://127.0.0.1:8765" autocomplete="off">
+    <label for="api-token">访问密钥（本机未启用验证时留空）</label>
+    <input id="api-token" type="password" autocomplete="off">
+    <p style="font-size:12px">远程使用 HTTPS。密钥和用于下载附件的微博登录信息会发送到此服务，请只填写自己的 NAS 或服务器。</p>
+    <button id="save-settings" type="button">保存并测试连接</button>
+    <div id="settings-result" role="status" aria-live="polite"></div>
   </div>
-  <div class="foot">只读备份 · 保守限速 · 数据仅存本机</div>
+  <div class="foot">只读备份 · 保守限速 · 数据存于你指定的设备</div>
   <script src="popup.js"></script>
 </body>
 </html>

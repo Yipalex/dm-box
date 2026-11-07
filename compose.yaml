@@ -1,0 +1,25 @@
+services:
+  dmbox:
+    build: .
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${DMBOX_BIND_IP:-127.0.0.1}:${DMBOX_PORT:-8765}:8765"
+    environment:
+      DMBOX_DATA_DIR: /data
+      DMBOX_REQUIRE_AUTH: "true"
+      DMBOX_API_TOKEN: ${DMBOX_API_TOKEN:?Set DMBOX_API_TOKEN in .env first}
+    volumes:
+      - type: bind
+        source: ${DMBOX_HOST_DATA_DIR:?Set DMBOX_HOST_DATA_DIR in .env first}
+        target: /data
+        bind:
+          create_host_path: false
+    user: "${DMBOX_UID:-10001}:${DMBOX_GID:-10001}"
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

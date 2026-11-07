@@ -1,32 +1,24 @@
-"""微博私信备份 · 本地服务（仅监听 127.0.0.1，数据不出本机）。
-
-启动：./.venv/bin/uvicorn server.app:app --host 127.0.0.1 --port 8765
-"""
+"""DMBox service: local or authenticated NAS deployment."""
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import db, export, media_worker
+from . import config, db, export, media_worker
+from .auth import access_guard
 
 app = FastAPI(title="微博私信备份本地服务")
 
-# 请求来自浏览器扩展的 background（带 host_permissions），CORS 放开仅为兜底；服务只绑 127.0.0.1
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.middleware("http")(access_guard)
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
 @app.on_event("startup")
 def _startup():
+    config.validate()
     db.get_conn()
     media_worker.start()
 
@@ -225,7 +217,9 @@ def do_export(
 
 @app.get("/exports/{name}")
 def get_export(name: str):
-    path = export.EXPORT_DIR / name
+    path = (export.EXPORT_DIR / name).resolve()
+    if path.parent != export.EXPORT_DIR.resolve():
+        raise HTTPException(404)
     if not path.is_file():
         raise HTTPException(404)
     return FileResponse(path)

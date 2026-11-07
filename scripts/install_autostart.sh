@@ -7,7 +7,7 @@ PROJECT_DIR="$(pwd)"
 LABEL="com.weibo-dm-backup.server"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 
-if [ ! -d .venv ]; then
+if ! ./.venv/bin/python -c 'import uvicorn' >/dev/null 2>&1; then
   echo "请先双击 start.command 完成首次安装"
   exit 1
 fi
@@ -21,7 +21,8 @@ cat > "$PLIST" <<EOF
   <key>Label</key><string>$LABEL</string>
   <key>ProgramArguments</key>
   <array>
-    <string>$PROJECT_DIR/.venv/bin/uvicorn</string>
+    <string>$PROJECT_DIR/.venv/bin/python</string>
+    <string>-m</string><string>uvicorn</string>
     <string>server.app:app</string>
     <string>--host</string><string>127.0.0.1</string>
     <string>--port</string><string>8765</string>

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "私信匣 DMBox · 微博私信备份",
-  "version": "1.0.5",
-  "description": "私信匣 DMBox：保守限速地把微博私信备份到本地（支持增量），数据全程不出本机。A Leo's box for an Aries' whispers。需配合本地服务使用。",
+  "version": "1.1.0",
+  "description": "微博私信备份到本机或自有 NAS，支持增量备份、媒体下载与管理。",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
@@ -18,23 +18,41 @@
       "128": "icons/icon128.png"
     }
   },
-  "permissions": ["storage", "cookies"],
+  "permissions": [
+    "storage",
+    "cookies"
+  ],
   "host_permissions": [
     "http://127.0.0.1:8765/*",
     "https://*.weibo.com/*"
   ],
-  "background": { "service_worker": "background.js" },
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
-      "matches": ["https://api.weibo.com/chat*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://api.weibo.com/chat*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://api.weibo.com/chat*"],
-      "js": ["injected.js"],
+      "matches": [
+        "https://api.weibo.com/chat*"
+      ],
+      "js": [
+        "injected.js"
+      ],
       "world": "MAIN",
       "run_at": "document_start"
     }
-  ]
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "minimum_chrome_version": "109"
 }

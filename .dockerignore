@@ -1,0 +1,6 @@
+*
+!Dockerfile
+!server/
+!server/**
+server/**/__pycache__/
+server/**/*.pyc

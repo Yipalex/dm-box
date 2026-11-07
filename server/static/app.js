@@ -365,7 +365,7 @@ $("exp-go").addEventListener("click", async () => {
   const result = await saveExport(d.name);
   if (result === "saved") toast("已保存：" + d.name);
   else if (result === "downloaded") toast("已下载：" + d.name);
-  else if (result === "cancelled") toast("已取消保存（文件仍在 data/exports/）");
+  else if (result === "cancelled") toast("已取消保存（文件仍在服务端导出目录）");
 });
 
 // ---------- 搜索 ----------

@@ -1,35 +1,46 @@
-// Service worker：内容脚本 → 本地服务的中转。
-// 内容脚本受页面 CORS 限制不能直接访问 127.0.0.1，
-// background 拥有 host_permissions，可直连本地服务。
-const SERVER = "http://127.0.0.1:8765";
+// Content scripts only ask for API operations; credentials stay in trusted extension contexts.
+const DEFAULT_SERVER = "http://127.0.0.1:8765";
+chrome.storage.local.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" });
 
-chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  if (msg && msg.type === "send_cookies") {
-    // 读取微博登录 Cookie 推送给本地服务（仅存内存），用于下载私信附件
-    chrome.cookies.getAll({ domain: "weibo.com" }, (cookies) => {
-      const header = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
-      fetch(SERVER + "/api/cookies", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cookie: header }),
-      })
-        .then((r) => sendResponse({ ok: r.ok }))
-        .catch((e) => sendResponse({ ok: false, error: String(e) }));
-    });
-    return true;
-  }
-  if (msg && msg.type === "api") {
-    const opts = { method: msg.method || "GET" };
-    if (msg.body !== undefined) {
-      opts.headers = { "Content-Type": "application/json" };
-      opts.body = JSON.stringify(msg.body);
+async function settings() {
+  const { serverUrl = DEFAULT_SERVER, apiToken = "" } = await chrome.storage.local.get(["serverUrl", "apiToken"]);
+  return { serverUrl, apiToken };
+}
+
+async function request(path, method = "GET", body) {
+  if (typeof path !== "string" || !/^\/api\/[a-z_]+(?:\?[^#]*)?$/.test(path)) throw new Error("无效的 API 路径");
+  const { serverUrl, apiToken } = await settings();
+  const headers = {};
+  if (apiToken) headers.Authorization = `Bearer ${apiToken}`;
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const response = await fetch(serverUrl + path, {
+    method, headers, body: body === undefined ? undefined : JSON.stringify(body),
+    credentials: "omit", redirect: "error", signal: AbortSignal.timeout(30000),
+  });
+  const data = await response.json().catch(() => null);
+  return { ok: response.ok, status: response.status, data, serverUrl,
+    error: response.ok ? undefined : (response.status === 401 ? "访问密钥错误或未填写" : `服务返回 ${response.status}`) };
+}
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (sender.id !== chrome.runtime.id || !msg) return;
+  let task;
+  if (msg.type === "get_preferences") {
+    task = chrome.storage.local.get(["autoIncremental", "lastIncrementalAt"])
+      .then(({ autoIncremental, lastIncrementalAt }) => ({ ok: true, data: { autoIncremental, lastIncrementalAt } }));
+  } else if (msg.type === "set_preferences") {
+    const values = {};
+    if (typeof msg.values?.autoIncremental === "boolean") values.autoIncremental = msg.values.autoIncremental;
+    if (typeof msg.values?.lastIncrementalAt === "number" && Number.isFinite(msg.values.lastIncrementalAt)) {
+      values.lastIncrementalAt = msg.values.lastIncrementalAt;
     }
-    fetch(SERVER + msg.path, opts)
-      .then(async (r) => {
-        const data = await r.json().catch(() => null);
-        sendResponse({ ok: r.ok, status: r.status, data });
-      })
-      .catch((e) => sendResponse({ ok: false, error: String(e) }));
-    return true; // 异步 sendResponse
-  }
+    task = chrome.storage.local.set(values).then(() => ({ ok: true }));
+  } else if (msg.type === "send_cookies") {
+    task = chrome.cookies.getAll({ domain: "weibo.com" }).then((cookies) =>
+      request("/api/cookies", "POST", { cookie: cookies.map((c) => `${c.name}=${c.value}`).join("; ") }));
+  } else if (msg.type === "api") {
+    task = request(msg.path, msg.method || "GET", msg.body);
+  } else return;
+  task.then(sendResponse).catch((error) => sendResponse({ ok: false, error: String(error.message || error) }));
+  return true;
 });

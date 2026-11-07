@@ -9,9 +9,8 @@ import re
 import sqlite3
 import threading
 from datetime import datetime
-from pathlib import Path
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+from .config import DATA_DIR
 DB_PATH = DATA_DIR / "weibo_dm.db"
 
 _local = threading.local()
