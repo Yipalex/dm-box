@@ -154,6 +154,20 @@ curl --noproxy '*' --max-time 5 http://127.0.0.1:8765/api/health
 - **Windows / 跨系统迁移**：不要复用另一台电脑或另一系统的 `.venv/`。关闭服务后，将旧 `.venv/` 改名保留，再运行 `start.bat` 重新安装；确保本机已安装 Python 3.10+。
 - **已安装 macOS 开机自启**：迁移后先确认手动启动正常，按 Ctrl+C 停止手动服务，再运行 `./scripts/install_autostart.sh`，更新自启配置里的项目路径。修复运行环境不会自动更新以前安装的自启路径。
 
+### 忘记了 NAS 的访问密钥
+
+管理页面的用户名是 `dmbox`。登录密码和 Chrome 扩展里填写的「访问密钥」都是部署时设置的 `DMBOX_API_TOKEN`。
+
+- **从 Mac 找回**：如果部署时保留了本机密钥副本，打开 Finder，按 `⌘⇧G` 并输入 `~/Library/Application Support/DMBox/`，查找对应 NAS 的 `nas-<NAS地址>.key` 文件。也可以在终端把密钥复制到剪贴板。运行前将 `<NAS地址>` 替换成文件名中的实际地址。
+
+  ```bash
+  tr -d '\n' < "$HOME/Library/Application Support/DMBox/nas-<NAS地址>.key" | pbcopy
+  ```
+
+- **从 NAS 找回**：用管理员权限查看 NAS 上与 `compose.yaml` 同目录的 `.env`，取 `DMBOX_API_TOKEN=` 后面的值。`.env.example` 是配置模板。
+
+请妥善保存密钥，并在分享配置、日志或截图前遮住它。
+
 ### 管理页面能打开，但扩展仍显示红点
 
 NAS 用户先在扩展弹窗确认服务地址和访问密钥，点击「保存并测试连接」并授予地址权限。401 表示密钥缺失或错误；网络错误应检查地址、HTTPS 证书、NAS 防火墙与端口映射。浏览器管理页面的登录状态不会代替扩展密钥。
